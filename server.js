@@ -1,23 +1,27 @@
 import express from "express";
+import cors from "cors";
 import "dotenv/config";
-import mysql from "mysql2/promise";
-import config from "./config.js";
+
+import router from "./router/routers.js";
+import fetchData from "./fetchData.js";
+import sequelize from "./config/database.js";
+
 const app = express();
 
+app.use(express.json());
+app.use(cors());
 
-async function fetchData() {
-  try {
-    const connection = await mysql.createConnection(config);
-    console.log("DB successfully attached... bitch 🤖");
+app.use("/api", router);
 
-    // Closing the base
-    await connection.end();
-  } catch (err) {
-    console.error("Error fetching data:", err.message);
-  }
-}
 
-app.listen(process.env.PORT || 7777, () => {
-  console.log(`Server is running on port : ${process.env.PORT || 6000} 🚀`);
-  fetchData();
+sequelize.sync().then(() => {
+  console.log('Database synced successfully.');
+}).catch((error) => {
+  console.error('Error syncing database:', error);
+});
+
+
+app.listen(process.env.PORT || 8080, () => {
+  console.log(`Server is running on port : ${process.env.PORT || 8080} 🚀`);
+  // fetchData();
 });
